@@ -1,0 +1,218 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Neon accents */
+.neon-card {
+  box-shadow: 0 6px 30px rgba(99, 102, 241, 0.06), 0 0 8px rgba(219, 39, 119, 0.06);
+  border-radius: 12px;
+}
+
+.shadow-neon {
+  box-shadow: 0 8px 30px rgba(219, 39, 119, 0.14), 0 0 12px rgba(99, 102, 241, 0.06);
+}
+
+/* thin top/bottom neon border */
+.neon {
+  border-image: linear-gradient(90deg, #ff0080, #ff8c00) 1;
+}
+
+/* small responsive tweaks */
+@media (max-width: 768px) {
+  .neon-card {
+    padding: 0.75rem;
+  }
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #3d3d3d;
+  border-radius: 10px;
+}
+
+
+.popup-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.popup-container {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background-color: rgba(32, 32, 32, 0.322);
+  backdrop-filter: blur(5px);
+}
+
+.popup-modal .image {
+  border: 2px solid white;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-height: 17rem;
+}
+
+.popup-modal img {
+  border-radius: 5px;
+  box-shadow: 2px 3px 5px black;
+  width: 100%;
+}
+
+.popup-modal .buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.popup-modal .buttons button {
+  border: 1px solid rgb(243, 243, 243);
+  color: white;
+  padding: 3px 8px;
+  border-radius: 5px;
+}
+
+.popup-modal .buttons button:hover {
+  background-color: #213146ce;
+  margin-top: -1px;
+}
+
+.placeholder .bg-color {
+  background: linear-gradient(45deg,
+      /* Angle of the gradient */
+      #3a5a85ce,
+      /* Color 1 */
+      #275185ce,
+      /* Color 2 */
+      #2763b3ce,
+      /* Color 3 (repeat for smoother transition) */
+      #4d77adce
+      /* Color 4 */
+    );
+  background-size: 400% 400%;
+  /* Larger than the element to allow movement */
+  animation: gradientAnimation 15s ease infinite alternate;
+  /* Apply the animation */
+}
+
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+    /* Starting position */
+  }
+
+  50% {
+    background-position: 100% 50%;
+    /* Mid-point position */
+  }
+
+  100% {
+    background-position: 0% 50%;
+    /* Ending position (returns to start) */
+  }
+}
+
+.settings-btn {
+  transform: rotate(0deg);
+  transition: 1s;
+}
+
+.settings-btn:hover {
+  transform: rotate(90deg);
+}
+
+@keyframes rotate {
+  0% {}
+
+}
+
+.setting-modal {
+  width: 40rem;
+  height: 20rem;
+  position: fixed;
+  top: 25%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(92, 92, 92, 0.692);
+  border-radius: 5px;
+  background-color: #050816;
+  z-index: 10;
+  padding: 10px;
+  box-shadow: 0px 0px 3px rgb(27, 27, 27);
+  transition: all 2s;
+  opacity: 0;
+}
+
+.setting-modal.active {
+  top: 50% !important;
+  opacity: 1;
+}
+
+.setting-modal .close {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+
+}
+
+/* History items  */
+.history-item .playbtn {
+  color: rgb(255, 255, 255);
+  background-color: rgba(0, 0, 0, 0.445);
+  backdrop-filter: blur(5px);
+}
+
+.history-title {
+  color: rgb(219, 219, 219);
+  transition: 0.3s;
+  
+}
+
+
+.text-truncate-2 {
+  height: 43px;
+  overflow: hidden;
+}
+
+.item-select-grid {
+  transition: all 0.3s;
+  opacity: 0;
+}
+
+.history-item-grid:hover .item-select-grid {
+  opacity: 0.8;
+}
+
+.history-item-grid:hover .history-item-action {
+  opacity: 1;
+}
+
+.history-item-action {
+  opacity: 0;
+  transition: 0.3s;
+}
+
+.item-thumbnail{
+  background-position:center center;
+  background-size:cover;
+  z-index:10;
+}

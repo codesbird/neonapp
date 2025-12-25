@@ -1,0 +1,300 @@
+const { app, BrowserWindow, ipcMain, Menu, dialog, shell } = require("electron");
+const path = require("path");
+const { spawn, exec } = require("child_process");
+const fs = require("fs");
+const { autoUpdater } = require("electron-updater");
+
+
+const isDev = true;
+let backendProcess = null;
+
+//validate only sinle instace of the app
+const gotLock = app.requestSingleInstanceLock();
+if (!gotLock) {
+  app.quit();
+  process.exit(0);
+}
+
+
+
+function createWindow() {
+  const win = new BrowserWindow({
+    width: 1000,
+    height: 700,
+    frame: false,
+    titleBarStyle: "hidden",
+    titleBarOverlay: false,
+    webPreferences: {
+      contextIsolation: true,
+      nodeIntegration: false,
+      preload: path.join(__dirname, "preload.js"),
+      sandbox: false
+    }
+  });
+  // Menu.setApplicationMenu(null); // Removes the application menu
+
+  console.log("Preload path:", path.join(__dirname, "preload.js"));
+
+  if (isDev) {
+    console.log("Development : Localhost:5173")
+    win.loadURL("http://localhost:5173");
+  } else {
+    console.log("Production : ", path.join(__dirname, "renderer", "dist", "index.html"))
+    win.loadFile(path.join(__dirname, "renderer", "dist", "index.html"));
+  }
+}
+
+
+function startBackend() {
+  if (backendProcess) return;
+
+  const backendPath = path.join(process.resourcesPath, "backend.exe");
+
+  backendProcess = spawn(backendPath, [], {
+    windowsHide: true,
+    detached: false   // IMPORTANT
+  });
+
+  backendProcess.on("exit", () => {
+    backendProcess = null;
+  });
+}
+
+// Kill backend.exe + all children
+function killBackendTree() {
+  if (!backendProcess) return;
+
+  const pid = backendProcess.pid;
+  backendProcess = null;
+  // Kill backend.exe + all children
+  exec(`taskkill /PID ${pid} /T /F`, () => { });
+}
+
+// 🔥 HANDLE ALL EXIT CASES
+app.on("before-quit", killBackendTree);
+app.on("will-quit", killBackendTree);
+app.on("window-all-closed", () => {
+  killBackendTree();
+  if (process.platform !== "darwin") app.quit();
+});
+process.on("exit", killBackendTree);
+process.on("SIGINT", killBackendTree);
+process.on("SIGTERM", killBackendTree);
+
+
+// app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  // killBackendTree();  // safety net
+  // startBackend();
+  createWindow();
+  // check automatic new update
+  const win = BrowserWindow.getAllWindows()[0];
+  setupAutoUpdater(win);
+  autoUpdater.checkForUpdates();
+});
+
+
+/* Python runner */
+function runPythonFunction(funcName, args = []) {
+  return new Promise((resolve) => {
+    const py = spawn("python", [
+      path.join(__dirname, "scripts", "worker.py"),
+      funcName,
+      ...args
+    ]);
+
+    let output = "";
+    let errorOut = "";
+
+    py.stdout.on("data", (data) => (output += data.toString()));
+    py.stderr.on("data", (data) => (errorOut += data.toString()));
+
+    py.on("close", () => {
+      try {
+        resolve(JSON.parse(output));
+      } catch (e) {
+        resolve({
+          success: false,
+          error: "Invalid JSON",
+          stdout: output,
+          stderr: errorOut
+        });
+      }
+    });
+  });
+}
+
+/* IPC: React → Electron → Python */
+ipcMain.handle("run-python", async (event, funcName, args = []) => {
+  return await runPythonFunction(funcName, args);
+});
+
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") app.quit();
+});
+
+// ----------------------------------------------------------------
+const settingsPath = path.join(app.getPath("userData"), "settings.json");
+const historyPath = path.join(app.getPath("userData"), "history.json");
+
+// Load settings
+ipcMain.handle("settings:load", async () => {
+  try {
+    if (fs.existsSync(settingsPath)) {
+      return JSON.parse(await fs.readFileSync(settingsPath, "utf8"));
+    }
+    return null;
+  } catch {
+    return null;
+  }
+});
+
+// Save settings
+ipcMain.handle("settings:save", async (_, data) => {
+  try {
+    await fs.writeFileSync(settingsPath, JSON.stringify(data, null, 2));
+    return true;
+  } catch {
+    return false;
+  }
+});
+
+
+// folder picker
+ipcMain.handle("dialog:selectFolder", async () => {
+  const res = await dialog.showOpenDialog({
+    properties: ["openDirectory"],
+    title: "Select Download Folder"
+  });
+
+  if (res.canceled || res.filePaths.length === 0) {
+    return null;
+  }
+
+  return res.filePaths[0];
+});
+
+// reveal folder
+ipcMain.handle('revealFolder', async (_, folderPath) => {
+  folderPath = path.dirname(folderPath)
+  console.log("Reveal folder:", folderPath);
+  await shell.showItemInFolder(folderPath);
+  return true;
+});
+
+// reveal file
+ipcMain.handle('revealFile', async (_, filePath) => {
+  console.log("Reveal file:", filePath);
+  await shell.showItemInFolder(filePath);
+  return true;
+});
+
+// Delete file
+ipcMain.handle('deleteFile', async (event, filePath) => {
+  if (!filePath) return { success: false, error: "Thumbnail not found" };
+  try {
+    console.log("File path ", filePath)
+    await fs.unlink(filePath);
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+});
+
+// open file
+ipcMain.handle('openFile', async (_, filePath) => {
+  console.log("Open file:", filePath);
+  await shell.openPath(filePath);
+  return true;
+});
+
+// minimize app window
+ipcMain.on("window:minimize", (event) => {
+  const win = BrowserWindow.getFocusedWindow();
+  if (win) win.minimize();
+});
+
+// maximize app window
+ipcMain.on("window:maximize", (event) => {
+  const win = BrowserWindow.getFocusedWindow();
+  if (!win) return;
+
+  if (win.isMaximized()) win.unmaximize();
+  else win.maximize();
+});
+
+// close app
+ipcMain.on("window:close", (event) => {
+  const win = BrowserWindow.getFocusedWindow();
+  if (win) win.close();
+});
+
+// check is maximized
+ipcMain.handle("window:isMaximized", () => {
+  const win = BrowserWindow.getFocusedWindow();
+  return win?.isMaximized();
+});
+
+
+// load History
+ipcMain.handle("history:load", async () => {
+  try {
+    if (fs.existsSync(historyPath)) {
+      return JSON.parse(fs.readFileSync(historyPath, 'utf8'))
+    }
+    return null;
+  }
+  catch {
+    return null;
+  }
+})
+
+// set history
+ipcMain.handle("history:set", async (_, data) => {
+  try {
+    fs.writeFileSync(historyPath, JSON.stringify(data, null, 2))
+    return true;
+  }
+  catch {
+    return false;
+  }
+
+});
+
+// app update events
+function setupAutoUpdater(win) {
+  autoUpdater.autoDownload = false; // user controlled
+
+  autoUpdater.on("update-available", () => {
+    win.webContents.send("update-available");
+  });
+
+  autoUpdater.on("update-not-available", () => {
+    win.webContents.send("update-not-available");
+  });
+
+  autoUpdater.on("download-progress", (progress) => {
+    win.webContents.send("update-download-progress", progress);
+  });
+
+  autoUpdater.on("update-downloaded", () => {
+    win.webContents.send("update-downloaded");
+  });
+
+  autoUpdater.on("error", (err) => {
+    win.webContents.send("update-error", err.message);
+  });
+}
+
+// user control auto or manual update
+ipcMain.handle("check-for-updates", async () => {
+  return autoUpdater.checkForUpdates();
+});
+
+ipcMain.handle("download-update", async () => {
+  return autoUpdater.downloadUpdate();
+});
+
+ipcMain.handle("install-update", () => {
+  autoUpdater.quitAndInstall();
+});

@@ -1,0 +1,65 @@
+{
+  "name": "electron-react-tailwind",
+  "version": "1.0.0",
+  "main": "main.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/codesbird/neonapp.git"
+  },
+  "scripts": {
+    "dev": "concurrently \"npm:dev:renderer\" \"npm:dev:electron\"",
+    "dev:renderer": "cd renderer && npm run dev",
+    "dev:electron": "wait-on http://localhost:5173 && electron .",
+    "build:renderer": "cd renderer && npm run build",
+    "build": "npm run build:renderer && electron-builder",
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.0",
+    "electron": "^28.0.0",
+    "electron-builder": "^24.13.3",
+    "wait-on": "^7.0.0"
+  },
+  "dependencies": {
+    "electron-updater": "^6.6.2",
+    "lucide-react": "^0.555.0"
+  },
+  "build": {
+    "appId": "com.neon.downloader",
+    "productName": "Social Media Downloader",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "codesbird",
+        "repo": "neonapp"
+      }
+    ],
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/dist/**/*",
+      "backend.exe",
+      "icons/**/*",
+      "playlist.json"
+    ],
+    "extraResources": [
+      {
+        "from": "downloads",
+        "to": "downloads"
+      },
+      {
+        "from": "thumbnails",
+        "to": "thumbnails"
+      },
+      {
+        "from": "backend.exe",
+        "to": "backend.exe"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "icons/merge.png",
+      "signAndEditExecutable": false
+    }
+  }
+}
