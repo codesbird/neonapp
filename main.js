@@ -5,7 +5,7 @@ const fs = require("fs");
 const { autoUpdater } = require("electron-updater");
 
 
-const isDev = true;
+const isDev = false;
 let backendProcess = null;
 
 //validate only sinle instace of the app
@@ -70,64 +70,35 @@ function killBackendTree() {
   exec(`taskkill /PID ${pid} /T /F`, () => { });
 }
 
-// 🔥 HANDLE ALL EXIT CASES
-app.on("before-quit", killBackendTree);
-app.on("will-quit", killBackendTree);
-app.on("window-all-closed", () => {
-  killBackendTree();
-  if (process.platform !== "darwin") app.quit();
-});
-process.on("exit", killBackendTree);
-process.on("SIGINT", killBackendTree);
-process.on("SIGTERM", killBackendTree);
-
+try {
+  // 🔥 HANDLE ALL EXIT CASES
+  app.on("before-quit", killBackendTree);
+  app.on("will-quit", killBackendTree);
+  app.on("window-all-closed", () => {
+    killBackendTree();
+    if (process.platform !== "darwin") app.quit();
+  });
+  process.on("exit", killBackendTree);
+  process.on("SIGINT", killBackendTree);
+  process.on("SIGTERM", killBackendTree);
+}
+catch (e) {
+  console.log("Error in exit handlers:", e);
+}
 
 // app.whenReady().then(createWindow);
 app.whenReady().then(() => {
   // killBackendTree();  // safety net
-  // startBackend();
+  startBackend();
   createWindow();
   // check automatic new update
   const win = BrowserWindow.getAllWindows()[0];
+
   setupAutoUpdater(win);
   autoUpdater.checkForUpdates();
 });
 
 
-/* Python runner */
-function runPythonFunction(funcName, args = []) {
-  return new Promise((resolve) => {
-    const py = spawn("python", [
-      path.join(__dirname, "scripts", "worker.py"),
-      funcName,
-      ...args
-    ]);
-
-    let output = "";
-    let errorOut = "";
-
-    py.stdout.on("data", (data) => (output += data.toString()));
-    py.stderr.on("data", (data) => (errorOut += data.toString()));
-
-    py.on("close", () => {
-      try {
-        resolve(JSON.parse(output));
-      } catch (e) {
-        resolve({
-          success: false,
-          error: "Invalid JSON",
-          stdout: output,
-          stderr: errorOut
-        });
-      }
-    });
-  });
-}
-
-/* IPC: React → Electron → Python */
-ipcMain.handle("run-python", async (event, funcName, args = []) => {
-  return await runPythonFunction(funcName, args);
-});
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
@@ -263,38 +234,44 @@ ipcMain.handle("history:set", async (_, data) => {
 
 // app update events
 function setupAutoUpdater(win) {
-  autoUpdater.autoDownload = false; // user controlled
+  autoUpdater.autoDownload = false;
 
-  autoUpdater.on("update-available", () => {
-    win.webContents.send("update-available");
+  autoUpdater.on("checking-for-update", () => {
+    win.webContents.send("update:checking");
+  });
+
+  autoUpdater.on("update-available", (info) => {
+    win.webContents.send("update:available", info);
   });
 
   autoUpdater.on("update-not-available", () => {
-    win.webContents.send("update-not-available");
+    win.webContents.send("update:not-available");
   });
 
   autoUpdater.on("download-progress", (progress) => {
-    win.webContents.send("update-download-progress", progress);
+    win.webContents.send("update:progress", progress);
   });
 
   autoUpdater.on("update-downloaded", () => {
-    win.webContents.send("update-downloaded");
+    win.webContents.send("update:downloaded");
   });
 
   autoUpdater.on("error", (err) => {
-    win.webContents.send("update-error", err.message);
+    win.webContents.send("update:error", err.message);
   });
 }
 
+
 // user control auto or manual update
-ipcMain.handle("check-for-updates", async () => {
+ipcMain.handle("update:check", () => {
+  if (!app.isPackaged) return { skipped: true };
   return autoUpdater.checkForUpdates();
 });
 
-ipcMain.handle("download-update", async () => {
+ipcMain.handle("update:download", () => {
   return autoUpdater.downloadUpdate();
 });
 
-ipcMain.handle("install-update", () => {
+ipcMain.handle("update:install", () => {
   autoUpdater.quitAndInstall();
 });

@@ -72,6 +72,32 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    
+    window.updater.onAvailable(() => {
+      console.log("Update available");
+    });
+
+    window.updater.onProgress((p) => {
+      console.log("Downloading:", p);
+    });
+
+    window.updater.onDownloaded(() => {
+      console.log("Update downloaded, restart required");
+    });
+
+    window.updater.onError((err) => {
+      console.error("Update error:", err);
+    });
+  }, []);
+
+
+
+  function updateMessage(event, message) {
+    console.log("message : ", message)
+    document.getElementById("appmessage").innerText = message;
+  }
+
+  useEffect(() => {
     computeCommonResolutions(results);
   }, [results]);
 
@@ -251,6 +277,7 @@ export default function Home() {
   }
 
 
+
   // UI
   return (
     <div className="min-h-screen bg-[#050816] text-white">
@@ -318,7 +345,7 @@ export default function Home() {
           <div className="col-span-2 pr-3 relative h-[80vh] overflow-auto relative">
             {(!isFetching && results.length === 0) &&
               <div className="flex items-center flex-col justify-center h-full">
-                <span className="text-4xl mx-auto text-gray-900 font-bold">
+                <span id="appmessage" className="text-4xl mx-auto text-gray-900 font-bold">
                   Paste Video Url
                 </span>
                 <p className="text-gray-900">https://youtube.com/?v=aldskfjlwrwk</p>

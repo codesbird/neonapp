@@ -12,7 +12,7 @@ contextBridge.exposeInMainWorld("api", {
   deleteFile: (path) => ipcRenderer.invoke("deleteFile", path),
   openFile: (path) => ipcRenderer.invoke("openFile", path),
   readHistory: () => ipcRenderer.invoke("history:load"),
-  setHistory: (data) => ipcRenderer.invoke("history:set",data),
+  setHistory: (data) => ipcRenderer.invoke("history:set", data),
   deleteHistory: (id) => ipcRenderer.invoke("history:delete", id)
 })
 
@@ -21,4 +21,18 @@ contextBridge.exposeInMainWorld("electronAPI", {
   maximize: () => ipcRenderer.send("window:maximize"),
   close: () => ipcRenderer.send("window:close"),
   isMaximized: () => ipcRenderer.invoke("window:isMaximized"),
+});
+
+
+contextBridge.exposeInMainWorld("updater", {
+  check: () => ipcRenderer.invoke("update:check"),
+  download: () => ipcRenderer.invoke("update:download"),
+  install: () => ipcRenderer.invoke("update:install"),
+
+  onChecking: (cb) => ipcRenderer.on("update:checking", cb),
+  onAvailable: (cb) => ipcRenderer.on("update:available", cb),
+  onNotAvailable: (cb) => ipcRenderer.on("update:not-available", cb),
+  onProgress: (cb) => ipcRenderer.on("update:progress", (_, p) => cb(p)),
+  onDownloaded: (cb) => ipcRenderer.on("update:downloaded", cb),
+  onError: (cb) => ipcRenderer.on("update:error", (_, e) => cb(e))
 });
