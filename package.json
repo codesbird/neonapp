@@ -7,7 +7,7 @@
     "url": "https://github.com/codesbird/neonapp"
   },
   "scripts": {
-    "dev": "concurrently \"npm:dev:renderer\" \"npm:dev:electron\"",
+    "dev": "./node_modules/.bin/concurrently \"npm:dev:renderer\" \"npm:dev:electron\"",
     "dev:renderer": "cd renderer && npm run dev",
     "dev:electron": "wait-on http://localhost:5173 && electron .",
     "build:renderer": "cd renderer && npm run build",

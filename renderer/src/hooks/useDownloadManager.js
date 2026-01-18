@@ -1,12 +1,14 @@
 import { useEffect } from "react";
 import { useDownloads } from "../context/DownloadContext";
+import { useError } from "../context/ErrorContext";
 
 /**
  * useDownloadManager: provides startDownload() that enqueues and starts when a slot is available.
  * Each started download opens a dedicated WebSocket and dispatches updates to DownloadContext.
  */
-export default function useDownloadManager() {
+export default function useDownloadManager(setRetryMessage) {
   const { state, dispatch } = useDownloads();
+  const { setError } = useError();
 
   // Attempt to start queued tasks when possible
   useEffect(() => {
@@ -105,6 +107,13 @@ export default function useDownloadManager() {
           });
         }
 
+        // NETWORK ISSUE
+        else if (msg.type === "network_issue" && msg.subtype === "retrying") {
+          if (setRetryMessage) {
+            setRetryMessage(msg.message);
+          }
+        }
+
         // DOWNLOAD COMPLETE
         else if (msg.type === "download_complete") {
           dispatch({
@@ -142,6 +151,7 @@ export default function useDownloadManager() {
         // BACKEND ERROR
         else if (msg.type === "error") {
           console.log("Error : ",msg)
+          setError(msg.message);
           dispatch({
             type: "UPDATE_ACTIVE",
             payload: {

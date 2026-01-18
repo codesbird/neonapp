@@ -18,7 +18,7 @@ os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 os.makedirs(TEMP_DIR, exist_ok=True)
 
 # Network & download tuning
-SEGMENTS_PER_STREAM = 6
+SEGMENTS_PER_STREAM = 16
 PROGRESS_INTERVAL = 0.25
 AIO_TIMEOUT = None  # will be created in callers (aiohttp.ClientTimeout(...))
 SEGMENT_RETRIES = 3

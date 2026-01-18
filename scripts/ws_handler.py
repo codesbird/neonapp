@@ -22,8 +22,8 @@ async def handler(ws: WebSocketServerProtocol):
         async for raw in ws:
             try:
                 msg = json.loads(raw)
-            except Exception:
-                await safe_send(ws, {"type":"error","success":False,"message":"invalid json"})
+            except json.JSONDecodeError:
+                await safe_send(ws, {"type": "error", "success": False, "message": "Invalid JSON received from client."})
                 continue
 
             mtype = msg.get("type")
@@ -33,13 +33,13 @@ async def handler(ws: WebSocketServerProtocol):
                 url = msg.get("url")
                 platform = msg.get("platform")
                 if not url:
-                    await safe_send(ws, {"type":"fetch","success":False,"message":"url missing"})
+                    await safe_send(ws, {"type":"fetch","success":False,"message":"URL is missing."})
                     continue
                 try:
                     info = await fetch_info(url,platform,ws)
                     await safe_send(ws, info)
                 except Exception as e:
-                    await safe_send(ws, {"type":"fetch","success":False,"message":str(e)})
+                    await safe_send(ws, {"type": "fetch", "success": False, "message": f"Failed to fetch video information: {e}"})
                 continue
 
             if mtype == "extract_audio":
@@ -206,11 +206,11 @@ async def handler(ws: WebSocketServerProtocol):
                                 raise RuntimeError("No streams downloaded")
                     except asyncio.CancelledError:
                         task.status = "cancelled"
-                        await safe_send(ws, {"type":"cancelled","taskId":task.task_id,"success":False})
+                        await safe_send(ws, {"type": "cancelled", "taskId": task.task_id, "success": False, "message": "Download was cancelled."})
                     except Exception as e:
                         task.status = "error"
-                        print("error :",e)
-                        await safe_send(ws, {"type":"error","taskId":task.task_id,"success":False,"message":str(e)})
+                        print("Download error:", e)
+                        await safe_send(ws, {"type": "error", "taskId": task.task_id, "success": False, "message": f"An unexpected error occurred during download: {e}"})
                     finally:
                         try:
                             if os.path.isdir(task.temp_dir):
@@ -309,11 +309,11 @@ async def handler(ws: WebSocketServerProtocol):
             except Exception:
                 pass
     except Exception as e:
-        print(e)
+        print(f"Unhandled error in WebSocket handler: {e}")
         try:
-            await safe_send(ws, {"type":"error","success":False,"message":str(e)})
+            await safe_send(ws, {"type": "error", "success": False, "message": f"A server error occurred: {e}"})
         except Exception as er:
-            print(" The errror  ",er)
+            print(f"Failed to send error message to client: {er}")
             pass
         if task:
             task.cancel()
