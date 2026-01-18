@@ -4,6 +4,7 @@ import Footer from "../components/Footer";
 import VideoCard from "../components/VideoCard";
 import DownloadItem from "../components/DownloadItem";
 import AppHistory from "../components/AppHistory"
+import Settings from "./Settings"
 
 import { useDownloads } from "../context/DownloadContext";
 import useFetch from "../hooks/useFetch";
@@ -13,7 +14,7 @@ import { CardPlaceholder } from "../components/VideoCard";
 import { useYouTubeValidator } from "../hooks/validator";
 import { Trash2, Play, Pause } from "lucide-react";
 
-export default function Home() {
+export default function Home({ setRetryMessage }) {
   // STATE
   const [url, setUrl] = useState("");
   const [results, setResults] = useState([]);
@@ -25,6 +26,7 @@ export default function Home() {
   const [playlistMeta, setPlaylistMeta] = useState(null);
   const [isAllPaused, setIsAllPaused] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [appSettings, setAppSettings] = useState([])
 
   // global download mode
@@ -36,7 +38,7 @@ export default function Home() {
   // backend manager
   const fetchInfo = useFetch();
   const { state, dispatch } = useDownloads();
-  const { enqueueDownload, pauseTask, resumeTask, cancelTask, retryTask, } = useDownloadManager();
+  const { enqueueDownload, pauseTask, resumeTask, cancelTask, retryTask, } = useDownloadManager(setRetryMessage);
   const { isValidVideo, isValidPlaylist } = useYouTubeValidator();
 
   // FETCH HANDLER
@@ -437,6 +439,7 @@ export default function Home() {
         onSelectAll={selectAll}
         onDeselectAll={deselectAll}
         setIsHistoryOpen={setIsHistoryOpen}
+        setIsSettingsOpen={setIsSettingsOpen}
         appSettings={appSettings}
       />
 
@@ -448,6 +451,10 @@ export default function Home() {
           />
         </>
       }
+      <Settings
+        isSettingsOpen={isSettingsOpen}
+        setIsSettingsOpen={setIsSettingsOpen}
+      />
     </div >
   );
 }

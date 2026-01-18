@@ -91,11 +91,19 @@ app.whenReady().then(() => {
   // killBackendTree();  // safety net
   startBackend();
   createWindow();
-  // check automatic new update
-  const win = BrowserWindow.getAllWindows()[0];
 
+  const win = BrowserWindow.getAllWindows()[0];
   setupAutoUpdater(win);
-  autoUpdater.checkForUpdates();
+
+  // Check for updates if enabled
+  fs.readFile(settingsPath, "utf8", (err, data) => {
+    if (!err) {
+      const settings = JSON.parse(data);
+      if (settings.autoUpdate) {
+        autoUpdater.checkForUpdates();
+      }
+    }
+  });
 });
 
 

@@ -13,6 +13,7 @@ export default function Footer({
   onSelectAll,
   onDeselectAll,
   setIsHistoryOpen,
+  setIsSettingsOpen,
 }) {
 
   const [isAnySelected, setIsAnySelected] = useState(false);
@@ -86,6 +87,11 @@ export default function Footer({
           Download Queue
           <span className="p-0 m-0">(5)</span>
           <ChevronUp />
+        </button>
+
+        <button onClick={() => setIsSettingsOpen(true)} className="flex items-center gap-1 bg-[#0b1220] hover:text-gray-200 rounded-full px-3 py-1 hover:bg-[#0w882d] font-semibold">
+          <ChevronUp />
+          Settings
         </button>
       </div>
 
