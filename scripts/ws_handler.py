@@ -7,13 +7,13 @@ import time
 from typing import Optional
 import websockets
 from websockets import WebSocketServerProtocol
-from scripts.fetcher import fetch_info
-from scripts.tasks import DownloadTask
-from scripts.stream_downloader import download_stream
-from scripts.merger import run_ffmpeg_merge
-from scripts.saveThumbnail import save_thumbnail
-from scripts.utils import safe_send, DOWNLOAD_DIR, TEMP_DIR, safe_filename
-from scripts.audio_extractor import run_audio_extract
+from fetcher import fetch_info
+from tasks import DownloadTask
+from stream_downloader import download_stream
+from merger import run_ffmpeg_merge
+from saveThumbnail import save_thumbnail
+from utils import safe_send, DOWNLOAD_DIR, TEMP_DIR, safe_filename
+from audio_extractor import run_audio_extract
 
 
 async def handler(ws: WebSocketServerProtocol):
@@ -159,6 +159,7 @@ async def handler(ws: WebSocketServerProtocol):
                             task.status = "merging"
                             await safe_send(ws, {"type":"merge_start","taskId":task.task_id,"success":True})
                             ok = await run_ffmpeg_merge(ws, audio_path, video_path, out_path, task.task_id, task.duration)
+                            
                             if ok:
                                 try: os.remove(video_path)
                                 except: pass

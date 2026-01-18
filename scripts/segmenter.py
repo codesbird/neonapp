@@ -4,7 +4,7 @@ import os
 import time
 from typing import Optional
 import aiohttp
-from scripts.utils import AIO_TIMEOUT, SEGMENT_RETRIES, NETWORK_STALL_TIMEOUT, SLOW_SPEED_THRESHOLD, safe_send
+from utils import AIO_TIMEOUT, SEGMENT_RETRIES, NETWORK_STALL_TIMEOUT, SLOW_SPEED_THRESHOLD, safe_send
 
 # note: AIO_TIMEOUT is None here; callers should pass appropriate timeout via session
 

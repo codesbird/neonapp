@@ -1,0 +1,10 @@
+{
+  "concurrent": 5,
+  "defaultType": "video",
+  "resolution": "1080p",
+  "audioBitrate": "160",
+  "downloadPath": "C:\\Users\\Tech2Saini\\Downloads",
+  "autoClear": true,
+  "layout": "grid",
+  "app": "YouTube"
+}

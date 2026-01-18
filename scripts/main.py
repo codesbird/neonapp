@@ -2,7 +2,7 @@
 import asyncio
 import signal
 import websockets
-from scripts.ws_handler import handler
+from ws_handler import handler
 
 HOST = "127.0.0.1"
 PORT = 8765

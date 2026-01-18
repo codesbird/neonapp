@@ -3,7 +3,7 @@ import asyncio
 from typing import Dict, Any
 from pytubefix import YouTube, Playlist
 from websockets import WebSocketServerProtocol
-from scripts.utils import safe_send
+from utils import safe_send
 
 
 

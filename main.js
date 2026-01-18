@@ -99,33 +99,64 @@ app.whenReady().then(() => {
 });
 
 
-
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });
 
 // ----------------------------------------------------------------
-const settingsPath = path.join(app.getPath("userData"), "settings.json");
-const historyPath = path.join(app.getPath("userData"), "history.json");
+// const settingsPath = path.join(app.getPath("userData"), "settings.json");
+// const historyPath = path.join(app.getPath("userData"), "history.json");
 
-// Load settings
+const baseDir =  process.cwd();
+const settingsPath = path.join(baseDir, "settings.json");
+const historyPath = path.join(baseDir, "history.json");
+console.log("Paths : ",settingsPath,historyPath)
+
+
+function ensureFile(filePath, defaultData = {}) {
+  if (!fs.existsSync(filePath)) {
+    fs.writeFileSync(filePath, JSON.stringify(defaultData, null, 2));
+  }
+}
+
+
 ipcMain.handle("settings:load", async () => {
   try {
-    if (fs.existsSync(settingsPath)) {
-      return JSON.parse(await fs.readFileSync(settingsPath, "utf8"));
-    }
-    return null;
-  } catch {
+    ensureFile(settingsPath, {});
+    return JSON.parse(fs.readFileSync(settingsPath, "utf8"));
+  } catch (err) {
+    console.error("Settings load error:", err);
     return null;
   }
 });
 
-// Save settings
 ipcMain.handle("settings:save", async (_, data) => {
   try {
-    await fs.writeFileSync(settingsPath, JSON.stringify(data, null, 2));
+    fs.writeFileSync(settingsPath, JSON.stringify(data, null, 2));
     return true;
-  } catch {
+  } catch (err) {
+    console.error("Settings save error:", err);
+    return false;
+  }
+});
+
+
+ipcMain.handle("history:load", async () => {
+  try {
+    ensureFile(historyPath, {"items":[]});
+    return JSON.parse(fs.readFileSync(historyPath, "utf8"));
+  } catch (err) {
+    console.error("History load error:", err);
+    return [];
+  }
+});
+
+ipcMain.handle("history:set", async (_, data) => {
+  try {
+    fs.writeFileSync(historyPath, JSON.stringify(data, null, 2));
+    return true;
+  } catch (err) {
+    console.error("History save error:", err);
     return false;
   }
 });
@@ -206,31 +237,6 @@ ipcMain.handle("window:isMaximized", () => {
   return win?.isMaximized();
 });
 
-
-// load History
-ipcMain.handle("history:load", async () => {
-  try {
-    if (fs.existsSync(historyPath)) {
-      return JSON.parse(fs.readFileSync(historyPath, 'utf8'))
-    }
-    return null;
-  }
-  catch {
-    return null;
-  }
-})
-
-// set history
-ipcMain.handle("history:set", async (_, data) => {
-  try {
-    fs.writeFileSync(historyPath, JSON.stringify(data, null, 2))
-    return true;
-  }
-  catch {
-    return false;
-  }
-
-});
 
 // app update events
 function setupAutoUpdater(win) {

@@ -3,7 +3,7 @@ import asyncio
 import os
 from typing import Dict, Any, Optional
 from websockets import WebSocketServerProtocol
-from scripts.utils import safe_filename
+from utils import safe_filename
 
 class DownloadTask:
     def __init__(self, task_id: str, payload: dict, ws: WebSocketServerProtocol, temp_dir: str):

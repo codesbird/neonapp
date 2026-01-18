@@ -5,9 +5,9 @@ import shutil
 import time
 from typing import Optional
 import aiohttp
-from scripts.utils import (SEGMENTS_PER_STREAM, PROGRESS_INTERVAL, MAX_SEGMENT_SIZE_FOR_MULTISEG,
+from utils import (SEGMENTS_PER_STREAM, PROGRESS_INTERVAL, MAX_SEGMENT_SIZE_FOR_MULTISEG,
                     safe_send, STREAM_MAX_RESTARTS, DOWNLOAD_DIR)
-from scripts.segmenter import download_segment
+from segmenter import download_segment
 
 async def probe_url(session: aiohttp.ClientSession, url: str):
     """

@@ -2,7 +2,7 @@
 import asyncio
 import re
 from typing import Optional
-from scripts.utils import safe_send
+from utils import safe_send
 
 async def run_ffmpeg_merge(ws, audio_path: str, video_path: str, output_path: str, task_id: str, duration: Optional[float] = None):
     cmd = ["ffmpeg", "-y", "-i", video_path, "-i", audio_path, "-c:v", "copy", "-c:a", "copy", "-progress", "pipe:1", "-nostats", output_path]
@@ -22,6 +22,7 @@ async def run_ffmpeg_merge(ws, audio_path: str, video_path: str, output_path: st
             if "progress=end" in s:
                 break
         rc = await proc.wait()
+        print("The ok status : ",rc)
 
         await safe_send(ws, {
             "type": "merge_complete",

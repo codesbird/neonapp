@@ -2,7 +2,7 @@
 import asyncio
 import os
 import signal
-from scripts.utils import safe_send
+from utils import safe_send
 
 import subprocess
 import json
