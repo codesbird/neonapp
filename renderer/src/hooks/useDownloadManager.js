@@ -233,9 +233,24 @@ export default function useDownloadManager(setRetryMessage) {
     setTimeout(() => dispatch({ type: "REMOVE_ACTIVE", payload: taskId }), 2000);
   };
 
-  const retryTaks = taskId => {
+  const retryTask = taskId => {
+    const task = state.active[taskId];
+    if (!task) return;
 
+    // create a fresh task object to avoid stale ws refs
+    const freshTask = {
+      taskId: "task_" + crypto.randomUUID(),  // new ID
+      filename: task.filename,
+      duration: task.duration,
+      streams: task.streams,
+      resolution: task.resolution,
+      path: task.path,
+      thumbnail: task.thumbnail
+    };
+
+    dispatch({ type: "REMOVE_ACTIVE", payload: taskId });
+    dispatch({ type: "ENQUEUE", payload: freshTask });
   }
 
-  return { enqueueDownload, pauseTask, resumeTask, cancelTask };
+  return { enqueueDownload, pauseTask, resumeTask, cancelTask, retryTask };
 }

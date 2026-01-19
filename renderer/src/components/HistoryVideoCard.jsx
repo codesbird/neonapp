@@ -92,7 +92,7 @@ export default function HistoryVideoCard({ item, index, onSelectItem, selectedIt
                 <div className="w-40 min-h-10 rounded overflow-hidden shadow-lg rounded relative">
                     <button onClick={() => playMedia(item.path)} className="flex items-center justify-center rounded-full playbtn absolute h-10 w-10 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"><Play size={'30px'} /></button>
                     <span className="flex items-center justify-center absolute bottom-1 left-0 px-1">{tools[item.from][0]}</span>
-                    <img className="" src={item.thumbnail} />
+                    <img className="" src={`atom://${item.thumbnail.split(/[\\/]/).pop()}`} />
                     <div className="absolute bottom-0 end-0 bg-[#160d0d] font-semibold text-white text-xs p-1 m-1 rounded w-fit">
                         {qualityTag(item.resolution)}
                     </div>

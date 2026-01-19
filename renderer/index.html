@@ -7,7 +7,22 @@
     <link rel="icon" href="C:/Users/Tech2Saini/Downloads/Gemini_Generated_Image_rpdkkxrpdkkxrpdk.png">
   </head>
   <body class="bg-neutral-900 text-white">
-    <div id="root"></div>
+    <div id="root">
+      <div id="loading-indicator" style="display: flex; justify-content: center; align-items: center; height: 100vh; font-size: 2rem; color: white;">
+        Social Media Downloader
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      const loadingIndicator = document.getElementById('loading-indicator');
+      const root = document.getElementById('root');
+      const observer = new MutationObserver(() => {
+        if (root.children.length > 1) {
+          loadingIndicator.style.display = 'none';
+          observer.disconnect();
+        }
+      });
+      observer.observe(root, { childList: true });
+    </script>
   </body>
 </html>
