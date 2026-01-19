@@ -1,6 +1,8 @@
 {
   "name": "electron-react-tailwind",
   "version": "1.0.0",
+  "description": "Social Media Downloader",
+  "author": "Your Name",
   "main": "main.js",
   "repository": {
     "type": "git",
@@ -58,8 +60,15 @@
     ],
     "win": {
       "target": "nsis",
-      "icon": "icons/merge.png",
+      "icon": "build/icons/icon.png",
       "signAndEditExecutable": false
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "snap"
+      ],
+      "icon": "build/icons"
     }
   }
 }

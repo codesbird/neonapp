@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import ProgressBar from "./ProgressBar";
 import { saveHistory } from "../hooks/useHistoryManager"
 
-export default function DownloadItem({ item, onPause, onResume, onCancel }) {
+export default function DownloadItem({ item, onPause, onResume, onCancel, onRetry }) {
   const percent = item.percent || 0;
   const status = item.status || "queued";
 

@@ -88,9 +88,15 @@ catch (e) {
 
 // app.whenReady().then(createWindow);
 app.whenReady().then(() => {
-  // killBackendTree();  // safety net
   startBackend();
   createWindow();
+
+  // register thumbnail protocol
+  protocol.registerFileProtocol('atom', (request, callback) => {
+    const url = request.url.substr(7);
+    const fullPath = path.join(__dirname, 'thumbnails', url);
+    callback({ path: path.normalize(fullPath) });
+  });
 
   const win = BrowserWindow.getAllWindows()[0];
   setupAutoUpdater(win);

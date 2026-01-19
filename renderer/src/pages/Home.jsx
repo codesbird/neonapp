@@ -411,6 +411,7 @@ export default function Home({ setRetryMessage }) {
                 onPause={pauseTask}
                 onResume={resumeTask}
                 onCancel={cancelTask}
+                onRetry={retryTask}
               />
             ))}
 
