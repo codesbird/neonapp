@@ -44,9 +44,15 @@ export default function DownloadItem({ item, onPause, onResume, onCancel }) {
       <div className="flex-1">
         <div className="text-white font-medium">{item.title || item.filename}</div>
         <div className="flex justify-between my-3">
-          <div className="text-xs text-gray-400">{String(item.status).toUpperCase()}</div>
-          <div className="text-xs text-gray-400">{item.status === 'running' ? `${formatBytes(item.speed)}/s` : "0 KB/s"}</div>
-          <div className="text-xs text-gray-400">{item.status === 'running' ? timeConversion(item.eta) : "00:00"}</div>
+          <div className="text-xs text-gray-400">
+            {status === "merging" ? "Merging..." : String(status).toUpperCase()}
+          </div>
+          {status !== "merging" && (
+            <>
+              <div className="text-xs text-gray-400">{item.status === 'running' ? `${formatBytes(item.speed)}/s` : "0 KB/s"}</div>
+              <div className="text-xs text-gray-400">{item.status === 'running' ? timeConversion(item.eta) : "00:00"}</div>
+            </>
+          )}
         </div>
 
         <div className="mt-2 flex gap-1">

@@ -67,6 +67,19 @@ export default function useDownloadManager(setRetryMessage) {
           });
         }
 
+        // MERGE START
+        else if (msg.type === "merge_start") {
+          dispatch({
+            type: "UPDATE_ACTIVE",
+            payload: {
+              taskId: task.taskId,
+              updates: {
+                status: "merging",
+              },
+            },
+          });
+        }
+
         // MERGE PROGRESS
         else if (msg.type === "merge_progress") {
           dispatch({

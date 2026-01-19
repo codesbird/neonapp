@@ -157,7 +157,7 @@ async def handler(ws: WebSocketServerProtocol):
 
                         if video_path and audio_path:
                             task.status = "merging"
-                            await safe_send(ws, {"type":"merge_start","taskId":task.task_id,"success":True})
+                            await safe_send(ws, {"type": "merge_start", "taskId": task.task_id, "success": True})
                             ok = await run_ffmpeg_merge(ws, audio_path, video_path, out_path, task.task_id, task.duration)
                             
                             if ok:

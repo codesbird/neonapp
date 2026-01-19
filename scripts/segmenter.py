@@ -35,7 +35,7 @@ async def download_segment(session: aiohttp.ClientSession, url: str, start: int,
                 last_bytes_time = time.time()
                 start_time = time.time()
                 with open(part_path, "ab") as fh:
-                    async for chunk in resp.content.iter_chunked(64*1024):
+                    async for chunk in resp.content.iter_chunked(1024*1024):
                         if task.is_cancelled():
                             return os.path.getsize(part_path)
                         while task.is_paused():
